@@ -3,7 +3,7 @@ import json
 import time
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind(('127.0.0.1', 5555))
+server.bind(('0.0.0.0', 5555))
 server.listen()
 
 size = 28
@@ -24,6 +24,7 @@ while True:
             player_name = data.get("dis_name")
             existing_nums = [int(p.replace("Player", "")) for p in all_players.keys()]
             new_num = 1
+            print("Player " + player_name + " has joined the server.")
             while new_num in existing_nums:
                 new_num += 1
 

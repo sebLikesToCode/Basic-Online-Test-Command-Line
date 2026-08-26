@@ -1,13 +1,16 @@
 from logging import exception
-
+import sys
 import keyboard
 import time
 import json
 import socket
+
+# Pass the server's LAN address as an argument; defaults to this machine.
+server_ip = sys.argv[1] if len(sys.argv) > 1 else "127.0.0.1"
 dis_name = input("Choose your name: ")
 # --- Handshake ---
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect(('127.0.0.1', 5555))
+client.connect((server_ip, 5555))
 client.send(json.dumps({"type": "JOIN", "dis_name": dis_name}).encode())
 startup_data = json.loads(client.recv(1024).decode())
 my_id = startup_data["id"]  # This is now "Player1", "Player2", etc.
@@ -99,7 +102,7 @@ while True:
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.settimeout(0.1)  # Don't hang forever if the server is slow
-        s.connect(('127.0.0.1', 5555))
+        s.connect((server_ip, 5555))
         s.send(json.dumps({"id": my_id, "action": action}).encode())
 
         resp = s.recv(4096).decode()  # Increased buffer size for many players
