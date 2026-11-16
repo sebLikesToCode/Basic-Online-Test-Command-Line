@@ -1,6 +1,34 @@
 from logging import exception
 import sys
-import keyboard
+import atexit
+import time
+from blessed import Terminal
+
+_term = Terminal()
+_held = {}
+_raw = None
+
+
+def pressed(key, window=0.045):
+    global _raw
+    if _raw is None:
+        _raw = _term.cbreak()
+        _raw.__enter__()
+        atexit.register(_raw.__exit__, None, None, None)
+    now = time.monotonic()
+    while True:
+        stroke = _term.inkey(timeout=0)
+        if not stroke:
+            break
+        name = stroke.name
+        if name and name.startswith("KEY_"):
+            name = name[4:].lower()
+        else:
+            name = str(stroke)
+        if name == " ":
+            name = "space"
+        _held[name.lower()] = now
+    return now - _held.get(key.lower(), 0.0) < window
 import time
 import json
 import socket
@@ -74,16 +102,16 @@ def print_board(player_dict, my_id, names_lookup):
 def move_plr():
     global plr_XY
     act = ""
-    if keyboard.is_pressed("w"):
+    if pressed("w"):
         act += "w"
        # if plr_XY[1] > 1: plr_XY[1] -= 1
-    if keyboard.is_pressed("s"):
+    if pressed("s"):
         act += "s"
       #  if plr_XY[1] < size - 2: plr_XY[1] += 1
-    if keyboard.is_pressed("a"):
+    if pressed("a"):
         act += "a"
        # if plr_XY[0] > 1: plr_XY[0] -= 1
-    if keyboard.is_pressed("d"):
+    if pressed("d"):
         act += "d"
         #if plr_XY[0] < size - 2: plr_XY[0] += 1
     return act
